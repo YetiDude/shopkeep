@@ -1,0 +1,179 @@
+PK ) Zq3 ~dnd_shopping_app/Procfile
+web: gunicorn app:app
+PK ) Z   kkdnd_shopping_app/app.py
+from flask import Flask, render_template, request
+import random
+
+app = Flask(__name__)
+
+# Sample data for shop names and shopkeepers
+shop_names = ["Potion Palace", "Enchanted Exchange", "Mystic Mart", "Arcane Emporium"]
+shopkeepers = [
+    {"name": "Borin", "personality": "Cheerful and talkative"},
+    {"name": "Elara", "personality": "Mysterious and wise"},
+    {"name": "Thorin", "personality": "Gruff but kind-hearted"},
+    {"name": "Lyra", "personality": "Friendly and helpful"}
+]
+
+# Sample items for different shop types
+items = {
+    "Weapons": ["Sword", "Dagger", "Bow", "Spear", "Axe", "Mace"],
+    "Potions": ["Healing Potion", "Mana Potion", "Strength Potion", "Invisibility Potion", "Speed Potion", "Fire Resistance Potion"],
+    "Armor": ["Helmet", "Chestplate", "Gauntlets", "Leggings", "Boots", "Shield"]
+}
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        level = int(request.form["level"])
+        shop_type = request.form["shop_type"]
+        quality = request.form["quality"]
+        village_type = request.form["village_type"]
+
+        # Determine the number of items based on level and quality
+        base_items_count = max(7, level + (2 if quality == "High" else -2 if quality == "Low" else 0))
+
+        # Adjust prices based on quality and village type
+        price_modifier = 1.0
+        if quality == "Low":
+            price_modifier *= 0.85
+        elif quality == "High":
+            price_modifier *= 1.20
+        if village_type == "Poor":
+            price_modifier *= 0.80
+        elif village_type == "Wealthy":
+            price_modifier *= 1.20
+
+        # Generate shop details
+        shop_name = random.choice(shop_names)
+        shopkeeper = random.choice(shopkeepers)
+        inventory = random.sample(items[shop_type], base_items_count)
+        inventory_with_prices = {item: round(random.uniform(50, 100) * price_modifier) for item in inventory}
+
+        return render_template("index.html", shop_name=shop_name, shopkeeper=shopkeeper, inventory=inventory_with_prices)
+
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
+PK ) Zd!dnd_shopping_app/requirements.txt
+Flask==2.0.1
+gunicorn==20.1.0
+PK ) Z  h]]&dnd_shopping_app/static/css/styles.css
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #444;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+}
+
+select, button {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.shop-details {
+    margin-top: 20px;
+}
+
+.shop-details h2, .shop-details h3, .shop-details h4 {
+    color: #444;
+}
+
+.shop-details ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.shop-details li {
+    padding: 5px 0;
+}
+PK ) ZU %dnd_shopping_app/templates/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Shopping App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>D&D Shopping App</h1>
+        <form method="POST">
+            <label for="level">Shop Level:</label>
+            <select name="level" id="level">
+                {% for i in range(1, 21) %}
+                <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+            <label for="shop_type">Shop Type:</label>
+            <select name="shop_type" id="shop_type">
+                <option value="Weapons">Weapons</option>
+                <option value="Potions">Potions</option>
+                <option value="Armor">Armor</option>
+            </select>
+            <label for="quality">Shop Quality:</label>
+            <select name="quality" id="quality">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <label for="village_type">Village Type:</label>
+            <select name="village_type" id="village_type">
+                <option value="Poor">Poor</option>
+                <option value="Standard">Standard</option>
+                <option value="Wealthy">Wealthy</option>
+            </select>
+            <button type="submit">Generate Shop</button>
+        </form>
+        {% if shop_name %}
+        <div class="shop-details">
+            <h2>🏪 Shop Name: {{ shop_name }}</h2>
+            <h3>🧙 Shopkeeper: {{ shopkeeper.name }} ({{ shopkeeper.personality }})</h3>
+            <h4>🛒 Inventory:</h4>
+            <ul>
+                {% for item, price in inventory.items() %}
+                <li>{{ item }} — {{ price }} gold</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+PK ) Zq3 ~  dnd_shopping_app/ProcfilePK ) Z   kk  Ndnd_shopping_app/app.pyPK ) Zd!   dnd_shopping_app/requirements.txtPK ) Z  h]]&  L	dnd_shopping_app/sta
